@@ -75,7 +75,7 @@ if login(username, password):
     if logout():
         print('logged-out successfully.')
     else:
-        print('logout failed')
+        print('logout failed.')
     
 else:
     print('login failed')
