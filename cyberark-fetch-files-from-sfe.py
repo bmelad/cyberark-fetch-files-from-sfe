@@ -2,7 +2,7 @@ import requests, json, base64
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-verifySSL = True
+verifySSL = False
 headers = {}
 
 def login(user, passwd):
@@ -30,9 +30,9 @@ def list_objects(safe_name):
     res = requests.get(base_url + 'WebServices/API.svc/Safes/' + safe_name + '/Content', headers = headers, verify = verifySSL)
     return res.json()
     
-def download_file(file_name, share_url):
+def download_file(safe_name, file_name, file_id):
     global download_directory
-    with requests.get(base_url + '/' + share_url, headers = headers, stream = True, verify = verifySSL) as res:
+    with requests.get(base_url + 'WebServices/API.svc/Safes/' + safe_name + '/Files/' + str(file_id) + '/Stream', headers = headers, stream = True, verify = verifySSL) as res:
         res.raise_for_status()
         with open(download_directory + '\\' + file_name, 'wb') as f:
             for chunk in res.iter_content(chunk_size=8192): 
@@ -46,13 +46,15 @@ def delete_file(safe_name, file_id):
     return (res.status_code == 200)
 
 session_id = ''
+username = '{username}'
+password = '{password}'
 host = '{cyberark-sfe-address}'
 base_url = 'https://' + host + '/SFE/'
 download_directory = '/tmp/files/'
 safe_name = '{safe-name}'
-delete_after_download = True
+delete_after_download = False
 
-if login('{username}', '{password}'):
+if login(username, password):
     print('logged-in successfully.')
     for file in list_objects(safe_name):
         if 'ContentType' not in file:
@@ -60,7 +62,7 @@ if login('{username}', '{password}'):
         else:
             if file['ContentType'] == 2:
                 print ('downloading \'' + file['ContentName'] + '\'...', end='')
-                if not download_file(file['ContentName'], file['ShareURL']):
+                if not download_file(safe_name, file['ContentName'], file['ContentID']):
                     print(' failed.')
                 else:
                     print(' done.')
