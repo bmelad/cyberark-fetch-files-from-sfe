@@ -78,6 +78,6 @@ if login(username, password):
         print('logout failed.')
     
 else:
-    print('login failed')
+    print('login failed.')
 
 print('\nthank you, come again :)')
